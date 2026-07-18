@@ -148,6 +148,7 @@ def maybe_build_draft_sampler(
     tp_rank: int,
     confidence_fn=None,
     out=None,
+    bonus_anchor: bool = False,
 ) -> Optional[DsparkDraftSampler]:
     """Build the graph-folded greedy draft sampler, or return None (with the
     reason logged) when the draft model cannot support folding and the
@@ -173,6 +174,7 @@ def maybe_build_draft_sampler(
         device=device,
         confidence_fn=confidence_fn,
         out=out,
+        bonus_anchor=bonus_anchor,
     )
 
 
