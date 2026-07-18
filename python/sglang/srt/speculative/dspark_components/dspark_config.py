@@ -204,6 +204,8 @@ def _get_speculators_config(config: Any) -> dict:
         return {}
     if isinstance(cfg, dict):
         return cfg
+    if hasattr(cfg, "__dict__"):
+        return vars(cfg)
     try:
         return dict(cfg)
     except Exception:
