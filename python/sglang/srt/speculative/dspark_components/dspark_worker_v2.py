@@ -149,8 +149,12 @@ class DSparkWorkerV2(BaseSpecWorker):
         self._block_pos_offsets = build_block_pos_offsets(
             length=self.verify_num_draft_tokens, device=self.device
         )
+        # Draft forward width: gamma+1 under the speculators bonus-anchor
+        # convention (anchor is a conditioning-only slot), gamma for DeepSpec.
+        # Must match DraftBlockProposer/DsparkDraftSampler.draft_width.
         self._draft_block_spec_info = make_draft_block_spec_info(
-            draft_token_num=int(self.gamma), device=self.device
+            draft_token_num=int(self.gamma + 1 if self._bonus_anchor else self.gamma),
+            device=self.device,
         )
 
         target_model = self.target_worker.model_runner.model
