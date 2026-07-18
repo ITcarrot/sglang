@@ -139,6 +139,7 @@ class SchedulerMetricsReporter:
         self.spec_num_forward_ct = 0
         self.spec_total_num_accept_tokens = 0  # lifetime
         self.spec_total_num_forward_ct = 0
+        self.spec_total_num_cap_tokens = 0
         self.spec_num_block_accept_tokens = 0
         self.spec_num_cap_tokens = 0
 
@@ -520,6 +521,7 @@ class SchedulerMetricsReporter:
         self.spec_num_forward_ct = 0
         self.spec_total_num_accept_tokens = 0
         self.spec_total_num_forward_ct = 0
+        self.spec_total_num_cap_tokens = 0
         self.spec_num_block_accept_tokens = 0
         self.spec_num_cap_tokens = 0
 
@@ -790,6 +792,7 @@ class SchedulerMetricsReporter:
             )
             self.spec_total_num_accept_tokens += self.spec_num_accept_tokens
             self.spec_total_num_forward_ct += self.spec_num_forward_ct
+            self.spec_total_num_cap_tokens += self.spec_num_cap_tokens
             self.spec_num_accept_tokens = self.spec_num_forward_ct = 0
             self.spec_num_block_accept_tokens = 0
             self.spec_num_cap_tokens = 0

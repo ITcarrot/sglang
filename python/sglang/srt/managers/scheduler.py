@@ -3884,6 +3884,23 @@ class Scheduler(
                 self.metrics_reporter.spec_total_num_accept_tokens
                 / self.metrics_reporter.spec_total_num_forward_ct
             )
+            # Raw lifetime counters (fold in the not-yet-flushed log-interval
+            # window so the values are exact at query time). `accept_tokens`
+            # counts committed tokens (accepted drafts + one bonus per verify);
+            # `forward_ct` counts per-request verify steps; `cap_tokens` counts
+            # drafted tokens submitted to ragged verify (0 outside CAP mode).
+            ret["spec_total_num_accept_tokens"] = (
+                self.metrics_reporter.spec_total_num_accept_tokens
+                + self.metrics_reporter.spec_num_accept_tokens
+            )
+            ret["spec_total_num_forward_ct"] = (
+                self.metrics_reporter.spec_total_num_forward_ct
+                + self.metrics_reporter.spec_num_forward_ct
+            )
+            ret["spec_total_num_cap_tokens"] = (
+                self.metrics_reporter.spec_total_num_cap_tokens
+                + self.metrics_reporter.spec_num_cap_tokens
+            )
 
         if RECORD_STEP_TIME:
             ret["step_time_dict"] = self.metrics_reporter.step_time_dict
