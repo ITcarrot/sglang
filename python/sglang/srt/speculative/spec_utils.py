@@ -107,6 +107,17 @@ def resolve_num_tokens_per_req(
     if phase == "target_verify":
         if num_draft_tokens is None:
             num_draft_tokens = server_args.speculative_num_draft_tokens
+        if is_draft_worker and spec_algorithm is not None and spec_algorithm.is_dspark():
+            # The DSpark draft forward width depends on the draft checkpoint's
+            # block convention (DeepSpec: gamma; speculators bonus-anchor:
+            # gamma + 1), which the static enum hook cannot see.
+            from sglang.srt.speculative.dspark_components.dspark_config import (
+                dspark_draft_capture_width,
+            )
+
+            return dspark_draft_capture_width(
+                server_args=server_args, num_draft_tokens=num_draft_tokens
+            )
         return spec_algorithm.get_num_tokens_per_req_for_target_verify(
             num_draft_tokens, is_draft_worker
         )

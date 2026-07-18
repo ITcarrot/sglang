@@ -127,6 +127,29 @@ def resolve_runtime_config(
     )
 
 
+def dspark_draft_capture_width(
+    *, server_args: ServerArgs, num_draft_tokens: int
+) -> int:
+    """Per-request token width of the DSpark draft forward: gamma
+    (= num_draft_tokens - 1) for DeepSpec-convention checkpoints, gamma + 1
+    (= num_draft_tokens) under the speculators bonus-anchor convention, where
+    the anchor occupies its own conditioning-only slot. Must agree with
+    DraftBlockProposer/DsparkDraftSampler.draft_width or draft cuda-graph
+    capture shears against the sampler's (bs, draft_width, H) view."""
+    from sglang.srt.utils.hf_transformers_utils import get_config
+
+    draft_hf_config = get_config(
+        server_args.speculative_draft_model_path,
+        trust_remote_code=server_args.trust_remote_code,
+        revision=server_args.speculative_draft_model_revision,
+        model_override_args=json.loads(server_args.json_model_override_args),
+    )
+    draft_config = parse_dspark_draft_config(draft_hf_config=draft_hf_config)
+    if draft_config.speculators_convention:
+        return int(num_draft_tokens)
+    return int(num_draft_tokens) - 1
+
+
 def read_draft_checkpoint_gamma(*, server_args: ServerArgs) -> Optional[int]:
     """Load the draft checkpoint's hf config and read its DSpark gamma
     (block_size). Raises on config-load failure; callers pick the fallback."""
