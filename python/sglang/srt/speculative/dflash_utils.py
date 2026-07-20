@@ -483,9 +483,16 @@ def parse_dflash_draft_config(*, draft_hf_config: Any) -> DFlashDraftConfig:
         min_value=1,
     )
 
+    # `aux_hidden_state_layer_ids` (speculators convention) counts how many target
+    # layers have run, so id N is the residual stream after layer N-1; DFlash's
+    # native `target_layer_ids` names layer N-1 directly. Convert on the fallback
+    # so both conventions reach set_dflash_layers_to_capture as native ids.
+    aux_as_target_layer_ids = (
+        None if aux_layer_ids is None else [int(x) - 1 for x in aux_layer_ids]
+    )
     layer_ids = dflash_cfg.get(
         "target_layer_ids",
-        _cfg_get(draft_hf_config, "target_layer_ids", aux_layer_ids),
+        _cfg_get(draft_hf_config, "target_layer_ids", aux_as_target_layer_ids),
     )
     parsed_target_layer_ids: Optional[List[int]]
     if layer_ids is None:

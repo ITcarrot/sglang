@@ -60,13 +60,20 @@ def _glm52_redhat_dspark_config() -> SimpleNamespace:
 
 class TestGLM52RedHatDSparkConfig(CustomTestCase):
     def test_dflash_parser_reads_nested_transformer_config_and_aux_layers(self):
+        """`aux_hidden_state_layer_ids` are speculators-convention ids counting
+        how many target layers have run, so id N is the residual stream after
+        layer N-1. They must be converted to DFlash-native ids (which name the
+        layer directly) on the fallback, matching the reference implementation
+        in vllm/transformers_utils/configs/speculators/algos.py. Without the
+        conversion the drafter is silently fed activations one layer too deep.
+        """
         parsed = parse_dflash_draft_config(
             draft_hf_config=_glm52_redhat_dspark_config()
         )
 
         self.assertEqual(parsed.num_hidden_layers, 5)
         self.assertEqual(parsed.block_size, 8)
-        self.assertEqual(parsed.target_layer_ids, [8, 23, 39, 55, 70])
+        self.assertEqual(parsed.target_layer_ids, [7, 22, 38, 54, 69])
         self.assertEqual(parsed.num_target_layers, 71)
 
     def test_dspark_parser_prefers_speculators_tokens_for_gamma(self):
@@ -75,7 +82,7 @@ class TestGLM52RedHatDSparkConfig(CustomTestCase):
         )
 
         self.assertEqual(parsed.gamma, 7)
-        self.assertEqual(parsed.target_layer_ids, [8, 23, 39, 55, 70])
+        self.assertEqual(parsed.target_layer_ids, [7, 22, 38, 54, 69])
         self.assertEqual(parsed.markov_rank, 256)
         self.assertEqual(parsed.markov_head_type, "vanilla")
         self.assertEqual(parsed.mask_token_id, 154856)
@@ -137,7 +144,7 @@ class TestGLM52RedHatDSparkConfig(CustomTestCase):
         parsed = parse_dflash_draft_config(draft_hf_config=raw_config)
 
         self.assertEqual(parsed.num_hidden_layers, 5)
-        self.assertEqual(parsed.target_layer_ids, [8, 23, 39, 55, 70])
+        self.assertEqual(parsed.target_layer_ids, [7, 22, 38, 54, 69])
 
     def test_dflash_parser_rejects_empty_aux_layer_ids(self):
         raw_config = _glm52_redhat_dspark_config_dict()
